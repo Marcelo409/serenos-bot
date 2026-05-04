@@ -1,0 +1,12 @@
+# Secretos - NUNCA subir
+.env
+
+# Entorno virtual
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
