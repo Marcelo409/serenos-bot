@@ -15,7 +15,7 @@ print(f"Cargadas {len(docs)} paginas")
 
 print("Partiendo en chunks...")
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
+    chunk_size=1500,
     chunk_overlap=200,
     separators=["\n\n", "\n", ". ", " ", ""]
 )
@@ -24,7 +24,8 @@ print(f"Generados {len(chunks)} chunks")
 
 print("Creando embeddings (puede tomar 1-2 minutos la primera vez)...")
 embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    model_name="intfloat/multilingual-e5-large",
+    encode_kwargs={"normalize_embeddings": True}
 )
 
 print("Construyendo base vectorial...")
@@ -37,9 +38,13 @@ llm = ChatGoogleGenerativeAI(
 )
 
 PROMPT_TEMPLATE = """Eres un asistente para serenos de la municipalidad de Chorrillos.
-Responde unicamente con base en el siguiente contexto extraido de documentos oficiales.
-Si la respuesta no esta en el contexto, di claramente: "No tengo esa informacion en los documentos disponibles."
-No inventes informacion. Cita el numero de pagina cuando sea posible.
+Tu tarea es responder preguntas usando el siguiente contexto extraido de documentos oficiales.
+
+Reglas:
+- Si la respuesta esta directamente en el contexto, respondela citando la pagina.
+- Si el contexto menciona el tema pero no responde completamente, resume lo que si dice y aclara que la respuesta es parcial.
+- Solo si el contexto no menciona el tema en absoluto, responde: "No tengo esa informacion en los documentos disponibles."
+- No inventes datos, nombres, cifras ni procedimientos.
 
 Contexto:
 {contexto}
@@ -56,7 +61,7 @@ while True:
         break
 
     # 1. Buscar los 4 chunks mas parecidos a la pregunta
-    relevantes = db.similarity_search(pregunta, k=4)
+    relevantes = db.similarity_search(pregunta, k=6)
 
     # 2. Armar el contexto con los chunks encontrados
     bloques = []
