@@ -10,3 +10,9 @@ __pycache__/
 
 # VS Code
 .vscode/
+
+# Documentos del piloto - no compartir públicamente
+documentos/
+
+# Base vectorial generada
+chroma_db/
